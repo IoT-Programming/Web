@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
 import HeartRateChart from './components/HeartRateChart';
 import GpsMap from './components/GpsMap';
 
 const App = () => {
-  // 샘플 데이터
+  const [pulse, setPulse] = useState(null);
+  const [bodyTemp, setBodyTemp] = useState(null);
+  const [airTemp, setAirTemp] = useState(null);
+  const [lat, setLat] = useState(null);
+  const [lon, setLon] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [phone, setPhone] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+
+
   const sampleHeartRateData = [
     { time: '10:00', heartRate: 72 },
     { time: '10:05', heartRate: 75 },
@@ -19,90 +28,146 @@ const App = () => {
     [37.5645, 126.9760],
   ];
 
-  // 센서 데이터 샘플
-  const temperatureData = 25; // 온도 (°C)
-  const bodyTemperatureData = 36.5; // 체온 (°C)
-  const humidityData = 60; // 습도 (%)
+  // WebSocket 연결 및 메시지 처리
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:8081/ws/notifications");
+
+    ws.onopen = () => {
+      console.log("WebSocket connection established");
+    };
+
+    ws.onmessage = (event) => {
+          try {
+            // JSON 파싱
+            const data = JSON.parse(event.data);
+            const newNotification = {
+                  message: data.message || null,
+                  phone: data.phone || null,
+            };
+            if (newNotification.message || newNotification.phone) {
+                  setNotifications((prevNotifications) => [...prevNotifications, newNotification]);
+                  console.log("Received and added notification:", newNotification);
+            }
+            // 상태 업데이트
+            setPulse(data.pulse || null);
+            setBodyTemp(data.bodyTemp || null);
+            setAirTemp(data.airTemp || null);
+            setLat(data.lan || null);
+            setLon(data.lon || null);
+
+            console.log("Received and parsed data:", data);
+          } catch (error) {
+            console.error("Error parsing WebSocket message:", error);
+          }
+    };
+
+    ws.onclose = (event) => {
+      console.error("WebSocket connection closed:", event.code, event.reason);
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
 
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #74ebd5, #ACB6E5)', // 그라데이션 배경
+        background: 'linear-gradient(135deg, #74ebd5, #ACB6E5)',
         padding: '20px',
       }}
     >
       <Typography
         variant="h4"
         align="center"
-        gutterBottom
         sx={{ marginBottom: '20px', fontWeight: 'bold', color: '#fff' }}
       >
         헬스워치 대시보드
       </Typography>
-      <Grid container spacing={3} justifyContent="center">
-        {/* 심박수 */}
-        <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                심박수
-              </Typography>
-              <HeartRateChart data={sampleHeartRateData} />
-            </CardContent>
-          </Card>
-        </Grid>
-        {/* GPS */}
-        <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                GPS 경로
-              </Typography>
-              <GpsMap route={sampleRoute} />
-            </CardContent>
-          </Card>
-        </Grid>
-        {/* 온도 */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%', textAlign: 'center' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                온도 센서
-              </Typography>
-              <Typography variant="h3" color="primary">
-                {temperatureData}°C
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        {/* 체온 */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%', textAlign: 'center' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                체온 센서
-              </Typography>
-              <Typography variant="h3" color="secondary">
-                {bodyTemperatureData}°C
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        {/* 습도 */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%', textAlign: 'center' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                습도 센서
-              </Typography>
-              <Typography variant="h3" color="textSecondary">
-                {humidityData}%
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+
+      <Grid container spacing={3}>
+              {/* 왼쪽 GPS */}
+              <Grid item xs={12} md={6}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      GPS 경로
+                    </Typography>
+                    <GpsMap route={sampleRoute} />
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* 오른쪽 심박수, 공기 온도, 체온 */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ marginBottom: "20px", textAlign: "center" }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      심박수
+                    </Typography>
+                    <Typography variant="h3" color="primary">
+                      {pulse} bpm
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ marginBottom: "20px", textAlign: "center" }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      공기 온도
+                    </Typography>
+                    <Typography variant="h3" color="secondary">
+                      {airTemp}°C
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ marginBottom: "20px", textAlign: "center" }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      체온 센서
+                    </Typography>
+                    <Typography variant="h3" color="textSecondary">
+                      {bodyTemp}°C
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
       </Grid>
+
+      <Box sx={{ marginTop: '30px', padding: '20px', backgroundColor: '#fff', borderRadius: '8px' }}>
+        <Typography variant="h6" gutterBottom>
+          실시간 알림
+        </Typography>
+        {notifications.length > 0 ? (
+          notifications.map((notification, index) => (
+            <Box key={index} sx={{ marginBottom: '10px', padding: '10px', border: '1px solid #ddd', borderRadius: '8px' }}>
+              {notification.message && (
+                <Typography variant="body1" gutterBottom>
+                  {notification.message}
+                </Typography>
+              )}
+              {notification.phone && (
+                <Typography variant="body2" color="textSecondary">
+                  연락처: {notification.phone}
+                </Typography>
+              )}
+            </Box>
+          ))
+        ) : (
+          <Typography variant="body1" color="textSecondary">
+            아직 알림이 없습니다.
+          </Typography>
+        )}
+      </Box>
+
+
+
       <Typography align="center" sx={{ marginTop: '20px', color: '#fff' }}>
         © 2024 헬스워치 대시보드 by React
       </Typography>
