@@ -13,21 +13,6 @@ const App = () => {
   const [phone, setPhone] = useState(null);
   const [notifications, setNotifications] = useState([]);
 
-
-  const sampleHeartRateData = [
-    { time: '10:00', heartRate: 72 },
-    { time: '10:05', heartRate: 75 },
-    { time: '10:10', heartRate: 80 },
-    { time: '10:15', heartRate: 85 },
-    { time: '10:20', heartRate: 78 },
-  ];
-
-  const sampleRoute = [
-    [37.5665, 126.9780],
-    [37.5655, 126.9775],
-    [37.5645, 126.9760],
-  ];
-
   // WebSocket 연결 및 메시지 처리
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8081/ws/notifications");
@@ -96,9 +81,9 @@ const App = () => {
                 <Card>
                   <CardContent>
                     <Typography variant="h6" gutterBottom>
-                      GPS 경로
+                      GPS 위치
                     </Typography>
-                    <GpsMap route={sampleRoute} />
+                    <GpsMap lat={lat} lon={lon} />
                   </CardContent>
                 </Card>
               </Grid>
