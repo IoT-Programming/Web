@@ -4,7 +4,7 @@ import HeartRateChart from './components/HeartRateChart';
 import GpsMap from './components/GpsMap';
 
 const App = () => {
-  const [pulse, setPulse] = useState(null);
+  const [bpm, setBpm] = useState(null);
   const [bodyTemp, setBodyTemp] = useState(null);
   const [airTemp, setAirTemp] = useState(null);
   const [lat, setLat] = useState(null);
@@ -34,7 +34,7 @@ const App = () => {
                   console.log("Received and added notification:", newNotification);
             }
             // 상태 업데이트
-            setPulse(data.pulse || null);
+            setBpm(data.bpm || null);
             setBodyTemp(data.bodyTemp || null);
             setAirTemp(data.airTemp || null);
             setLat(data.lan || null);
@@ -96,7 +96,7 @@ const App = () => {
                       심박수
                     </Typography>
                     <Typography variant="h3" color="primary">
-                      {pulse} bpm
+                      {bpm} bpm
                     </Typography>
                   </CardContent>
                 </Card>
