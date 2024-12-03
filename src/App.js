@@ -15,7 +15,7 @@ const App = () => {
 
   // WebSocket 연결 및 메시지 처리
   useEffect(() => {
-    const ws = new WebSocket("wss://34.69.7.102:8081/ws/notifications");
+    const ws = new WebSocket("wss://34.69.7.102:8081/wss/notifications");
 
     ws.onopen = () => {
       console.log("WebSocket connection established");
