@@ -5,8 +5,8 @@ import GpsMap from './components/GpsMap';
 
 const App = () => {
   const [BPM, setBpm] = useState(null);
-  const [bodyTemp, setBodyTemp] = useState(null);
-  const [airTemp, setAirTemp] = useState(null);
+  const [body, setBody] = useState(null);
+  const [air, setAir] = useState(null);
   const [lat, setLat] = useState(null);
   const [lon, setLon] = useState(null);
   const [message, setMessage] = useState(null);
@@ -35,8 +35,8 @@ const App = () => {
             }
             // 상태 업데이트
             setBpm(data.bpm);
-            setBodyTemp(data.bodyTemp);
-            setAirTemp(data.airTemp);
+            setBody(data.body);
+            setAir(data.air);
             setLat(data.lan);
             setLon(data.lon);
 
@@ -107,7 +107,7 @@ const App = () => {
                       공기 온도
                     </Typography>
                     <Typography variant="h3" color="secondary">
-                      {airTemp}°C
+                      {air}°C
                     </Typography>
                   </CardContent>
                 </Card>
@@ -118,7 +118,7 @@ const App = () => {
                       체온 센서
                     </Typography>
                     <Typography variant="h3" color="textSecondary">
-                      {bodyTemp}°C
+                      {body}°C
                     </Typography>
                   </CardContent>
                 </Card>
